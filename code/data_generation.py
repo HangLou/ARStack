@@ -12,7 +12,7 @@ warnings.filterwarnings('ignore')
 VALID_ATOMS = ('C', 'CA', 'N')
 
 
-def get_protein_list(input_dir='data/input/raw/predicted_structures/dataset1'):
+def get_protein_list(input_dir='data/input/raw/Dataset1'):
     ls = []
     for name in os.listdir(input_dir):
         if 'alpha' in name:
@@ -20,22 +20,22 @@ def get_protein_list(input_dir='data/input/raw/predicted_structures/dataset1'):
     return(ls)
 
 
-def get_baker_coordinates(protein):
+def get_baker_coordinates(protein, dataset):
     atom_coordinates = []
     p = PDBParser()
     structure = p.get_structure(
-        '', f'../input/raw/predicted_structures/{protein}_rosetta.pdb')
+        '', f'data/input/raw/Dataset{dataset}/{protein}_rosetta.pdb')
     for atom in structure.get_atoms():
         atom_coordinates.append((atom.get_name(), list(atom.get_coord())))
 
     return atom_coordinates
 
 
-def get_alpha_ppsequence_and_coordinates(protein):
+def get_alpha_ppsequence_and_coordinates(protein, dataset):
     atom_coordinates = []
     p = PDBParser()
     structure = p.get_structure(
-        '', f'../input/raw/predicted_structures/{protein}_alpha.pdb')
+        '', f'data/input/raw/Dataset{dataset}/{protein}_alpha.pdb')
     for atom in structure.get_atoms():
         atom_name = atom.get_name()
         if atom_name in VALID_ATOMS:
@@ -62,10 +62,10 @@ def get_backbone_indices(sequence, overlapping_indices):
     return backbone_indices
 
 
-def align_alpha_reference_seqs(protein, alpha_polypeptide_sequence):
+def align_alpha_reference_seqs(protein, alpha_polypeptide_sequence, dataset):
     p = MMCIFParser()
     structure = p.get_structure(
-        '', f'../input/raw/reference_structures/{protein.lower()}.cif')
+        '', f'data/input/raw/ref_Dataset{dataset}/{protein.lower()}.cif')
 
     # Ensure there is only one chain in the structure.
     assert(len(structure) == 1)
@@ -102,7 +102,7 @@ def align_alpha_reference_seqs(protein, alpha_polypeptide_sequence):
                     if i == j:
                         overlapping_indices.append(index)
                     index += 1
-
+                print('overlapping indices:', overlapping_indices)
                 # Group overlapping indices by whether there's a gap in the
                 # alignment.
                 grouped_overlapping_indices = []
@@ -129,7 +129,9 @@ def align_alpha_reference_seqs(protein, alpha_polypeptide_sequence):
                         aligned_ref_sequence[i])
                 longest_overlapping_sequence = ''.join(
                     longest_overlapping_sequence_list)
+                print('longest overlapping indices:', overlapping_indices)
                 # Get longest non-overlapping indices.
+                print('length pp_seqence:', len(pp_sequence))
                 ref_overlapping_indices = []
                 for starting_index in range(len(pp_sequence)):
                     pp_sequence_subset = pp_sequence[starting_index:]
@@ -145,6 +147,7 @@ def align_alpha_reference_seqs(protein, alpha_polypeptide_sequence):
                 if longest_aligned > (0.8 * len(pp_sequence)):
                     ref_backbone_indices = get_backbone_indices(pp_sequence,
                                                                 ref_overlapping_indices)
+                    print(ref_overlapping_indices)
                     alpha_backbone_indices = get_backbone_indices(
                         alpha_polypeptide_sequence,
                         longest_overlapping_indices)
@@ -217,17 +220,18 @@ def superimpose(alpha_atom_coordinates, baker_atom_coordinates, ref_atom_coordin
     return calculate_distances(alpha_trans, baker_trans, ref_array)
 
 
-def main(protein):
+def main(protein, dataset):
     #protein = '1A1B'
 
-    base_baker_atom_coordinates = get_baker_coordinates(protein)
+    base_baker_atom_coordinates = get_baker_coordinates(protein, dataset)
 
-    alpha_prediction = get_alpha_ppsequence_and_coordinates(protein)
+    alpha_prediction = get_alpha_ppsequence_and_coordinates(protein, dataset)
     base_alpha_atom_coordinates = alpha_prediction[0]
     alpha_polypeptide_sequence = alpha_prediction[1]
 
     alignment_outcome = align_alpha_reference_seqs(
-        protein, alpha_polypeptide_sequence)
+        protein, alpha_polypeptide_sequence, dataset)
+    print(alignment_outcome[2])
     ref_atom_coordinates = alignment_outcome[0]
     ref_backbone_indices = alignment_outcome[1]
     alpha_backbone_indices = alignment_outcome[2]
@@ -265,7 +269,7 @@ def main(protein):
 
 
 def create_vector_info(dataset: int = 1):
-    input_dir = 'data/input/raw/predicted_structures/dataset' + \
+    input_dir = 'data/input/raw/Dataset' + \
         str(dataset)+'/'
     prot_ls = get_protein_list(input_dir)
     vector_info = []
@@ -274,12 +278,12 @@ def create_vector_info(dataset: int = 1):
         #        input(prot)
         # if 1==2:
 
-        ls, vector_data = main(prot)
+        ls, vector_data = main(prot, dataset)
         # total.append([prot]+ls)
        # atom_counts.append([prot]+rel_atm_alpha)
         vector_info.append([prot]+vector_data)
     df = pd.DataFrame(vector_info)
-    df.to_csv('data/input/processed/vector_dataset'+str(1)+'.csv')
+    df.to_csv('data/input/processed/vector_Dataset'+dataset+'.csv')
 
 
 if __name__ == '__main__':
