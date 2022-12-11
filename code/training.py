@@ -17,11 +17,10 @@ numbers = dict(zip(numbers, numbers))
 
 
 def get_data(dataset: int):
-    if dataset == 1:
 
-        csv = pd.read_csv(
-            'one_per_fam_comb_20_MSA_uniprot_descriptors_10flank.csv')
-    del csv['Unnamed: 0']
+    csv = pd.read_csv(
+        'data/input/processed/MSA_Dataset'+str(dataset)+'.csv')
+    #del csv['Unnamed: 0']
     return csv
 
 

@@ -16,8 +16,9 @@ warnings.filterwarnings('ignore')
 print('done importing')
 
 
-def get_data():
-    df = pd.read_csv('train_uniprot_predicted_distances.csv')
+def get_data(dataset=1):
+    df = pd.read_csv(
+        'data/output/predicted_distances_dataset'+str(dataset)+'.csv')
     df.set_index('0', inplace=True)
 
 #    df=df.iloc[:, int(len(df.columns)/2):]
@@ -25,9 +26,10 @@ def get_data():
     return df
 
 
-def get_vectors():
+def get_vectors(dataset=1):
     #dfv = pd.read_csv('combined_vector_info.csv')
-    dfv = pd.read_csv('JK_two_per_fam_train_vector_info.csv')
+    dfv = pd.read_csv(
+        'data/input/processed/vector_Dataset'+str(dataset)+'.csv')
     dfv.set_index('0', inplace=True)
     return dfv
 
@@ -105,12 +107,13 @@ alpha = []
 
 
 if __name__ == '__main__':
+    dataset = 1
 
-    df = get_data()
+    df = get_data(dataset)
 
     win = 0
     loss = 0
-    support_vector = get_vectors()
+    support_vector = get_vectors(dataset)
     # input(support_vector.head())
     proteins = list(df.index)
 
