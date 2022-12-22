@@ -309,7 +309,7 @@ def main(protein, dataset):
     distances, vector_info = superimpose(
         alpha_atom_coordinates, baker_atom_coordinates, ref_atom_coordinates)
     assert(len(distances) == len(vector_info))
-    return distances, vector_info
+    return distances, vector_info, alpha_backbone_indices
 
 
 def create_vector_info(dataset: int = 1):
@@ -317,6 +317,8 @@ def create_vector_info(dataset: int = 1):
         str(dataset)+'/'
     prot_ls = get_protein_list(input_dir)
     vector_info = []
+    atom_counts = []
+    total = []
     numbers = np.arange(0, 1500, 100)
     numbers = dict(zip(numbers, numbers))
     tp = 0
@@ -332,17 +334,27 @@ def create_vector_info(dataset: int = 1):
         #protein = '4B3W'
         try:
 
-            ls, vector_data = main(protein, dataset)
+            ls, vector_data, alpha_backbone_indices = main(protein, dataset)
     # total.append([prot]+ls)
     # atom_counts.append([prot]+rel_atm_alpha)
             vector_info.append([protein]+vector_data)
+            atom_counts.append([protein]+alpha_backbone_indices)
+            total.append([protein]+ls)
         except Exception as e:
             print(protein, e)
             # print(traceback.print_exc())
     df = pd.DataFrame(vector_info)
+    df1 = pd.DataFrame(atom_counts)
+    df2 = pd.DataFrame(total)
     df.to_csv('data/input/processed/vector_Dataset'+str(dataset)+'.csv')
+    df1.to_csv('data/input/processed/atom_counts_Dataset'+str(dataset)+'.csv')
+    df2.to_csv('data/input/processed/targets_Dataset'+str(dataset)+'.csv')
 
 
 if __name__ == '__main__':
     dataset = 1
+    create_vector_info(dataset=dataset)
+    dataset = 2
+    create_vector_info(dataset=dataset)
+    dataset = 3
     create_vector_info(dataset=dataset)
