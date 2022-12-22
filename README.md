@@ -8,7 +8,20 @@ To install the required packages, run the following:
 ```console
 pip install .
 ```
+The following command downloads the required files, including MSA inputs, Alphafold and Rossetta predicted structures and ground truth structures. 
+```console
+python download_data.py
+```
 ## running codes
+Generate processed MSA input data from the current MSA data in txt file format, which consists of the following steps:
+- txt to csv 
+```console
+python3 code/MSA_txt_csv.py
+```
+- aggergate csv files and match input/output pair
+```console
+python3 code/MAS_input.py
+```
 Generate processed vectors:
 ```console
 python3 code/data_generation.py
@@ -20,18 +33,9 @@ train model:
 python3 code/training.py
 ```
 
-run evaluation on the trained models:
+run evaluation on the trained models and reproduce figures:
 
 ```console
 python3 code/evaluations.py
 ```
 
-Reproduce plots:
-```console
-python3 code/plots.py
-```
-
-## TODO:
-1. Access to the raw data of all 3 dataset.
-2. Code and data to produce the MSA features csv.
-3. Add functions in code/plots.py for the plots in the paper. 
