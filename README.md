@@ -1,6 +1,5 @@
 ARStack
 ========================================
-
 ## Environment Setup
 The code has been tested successfully using Python 3.8; thus we suggest using this version or a later version of Python. A typical process for installing the package dependencies involves creating a new Python virtual environment.
 
@@ -8,7 +7,7 @@ To install the required packages, run the following:
 ```console
 pip install .
 ```
-The following command downloads the required files, including MSA inputs, Alphafold and Rossetta predicted structures and ground truth structures. 
+The following command downloads the required files, including MSA inputs, predicted structures from Alphafold and Rosetta and ground truth structures. 
 ```console
 python download_data.py
 ```
